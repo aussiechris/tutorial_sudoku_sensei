@@ -22,7 +22,7 @@ object SudokuSensei {
   /**
     * Let's define a case class for a move -- putting a number in a position
     */
-  case class Move(p:Position, n:Int)
+  case class Move(p: Position, n: Int)
 
   /**
     * And let's type alias Grid as a Map from Position to Int
@@ -33,13 +33,13 @@ object SudokuSensei {
     * First, let's define a function that'll parse our Sudoku grid from a multi-line string.
     * We'll use '.' for an empty space, and a number is a number. So, here's a few grids
     */
-  def parseGrid(gridString:String):Grid = {
+  def parseGrid(gridString: String): Grid = {
     val split = gridString.split('\n')
 
     // Notice the for notation -- this turns into flatMap, map, and filterWith
     // the "if" in this part of the for notation translates to filterWith -- another higher order function
     // also notice `0 until 9` produces `Seq(0,1,2,3,4,5,6,7,8)`
-    val tuples:Seq[(Position, Int)] = for {
+    val tuples: Seq[(Position, Int)] = for {
       x <- 0 until 9
       y <- 0 until 9 if split(y).charAt(x).isDigit
     } yield (x, y) -> split(y).charAt(x).toString.toInt // if we just do char to int, we get the character code not the number
@@ -50,7 +50,7 @@ object SudokuSensei {
   /**
     * And now let's create a sample Sudoku that we'll work from
     */
-  val grid1:Grid = parseGrid(
+  val grid1: Grid = parseGrid(
     """
       |...1.5.68
       |......7.1
@@ -76,15 +76,17 @@ object SudokuSensei {
     *
     * Don't forget, Position is just an alias for a tuple (Int, Int)
     */
-  def row(pos:Position):Seq[Position] = {
-    ???
+  def row(pos: Position): Seq[Position] = {
+    val (_, row) = pos
+    for (col <- 0 until 9) yield (col, row)
   }
 
   /**
     * Now let's make a function that will return all the Positions in the same column
     */
-  def column(pos:Position):Seq[Position] = {
-    ???
+  def column(pos: Position): Seq[Position] = {
+    val (col, _) = pos
+    for (row <- 0 until 9) yield (col, row)
   }
 
   /**
@@ -94,15 +96,20 @@ object SudokuSensei {
     *
     * So let's define that as a function. (No higher order functions required here)
     */
-  def whichThree(n:Int):Seq[Int] = {
-    ???
+  def whichThree(n: Int): Seq[Int] = {
+    if (n < 3) Seq(0, 1, 2)
+    else if (n < 6) Seq(3, 4, 5)
+    else Seq(6, 7, 8)
   }
 
   /**
     * And then let's use that function to return all the positions in the same quadrant.
     */
-  def quadrant(pos:Position):Seq[Position] = {
-    ???
+  def quadrant(pos: Position): Seq[Position] = {
+    val (x, y) = pos
+    val xQuad = whichThree(x)
+    val yQuad = whichThree(y)
+    for (xPos <- xQuad; yPos <- yQuad) yield (xPos, yPos)
   }
 
   /**
@@ -114,7 +121,7 @@ object SudokuSensei {
     * Seq[Position => Seq[Position]], otherwise when we put the functions into the list the
     * compiler is going to think we are trying to call them but forgot the parameters.
     */
-  val positionFunctions:Seq[Position => Seq[Position]] = Seq(row, column, quadrant)
+  val positionFunctions: Seq[Position => Seq[Position]] = Seq(row, column, quadrant)
 
 
   /**
@@ -126,8 +133,8 @@ object SudokuSensei {
     *
     * And you might want to use the exists method -- a higher order function on sequences.
     */
-  def numberPresentIn(grid:Grid, n:Int, positions:Seq[Position]):Boolean = {
-    ???
+  def numberPresentIn(grid: Grid, n: Int, positions: Seq[Position]): Boolean = {
+    (for (pos <- positions) yield grid.getOrElse(pos, false)).contains(n)
   }
 
   /**
@@ -142,8 +149,11 @@ object SudokuSensei {
     * Extra bonus (but not necessary): you can nest two higher order functions, if you have
     * positionFunctions.exists(...
     */
-  def possibilitiesFor(pos:Position, grid:Grid):Seq[Int] = {
-    ???
+  def possibilitiesFor(pos: Position, grid: Grid): Seq[Int] = {
+    // get all positions in this row, col and grid
+    val positions = (for (function <- positionFunctions) yield function(pos)).flatten
+    // get all numbers that are not present in any of the shared row, col and grid positions
+    for (num <- 1 to 9 if !numberPresentIn(grid, num, positions)) yield num
   }
 
   /**
@@ -151,8 +161,11 @@ object SudokuSensei {
     * positions that can be filled in automatically -- that is, there is only one possibility for
     * what number goes there.
     */
-  def nextMoves(grid:Grid):Seq[(Position, Int)] = {
-    ???
+  def nextMoves(grid: Grid): Seq[(Position, Int)] = {
+    // for all (x,y) positions where there is only one answer
+    for (x <- 0 until 9; y <- 0 until 9 if possibilitiesFor((x, y), grid).length == 1) yield {
+      // output the valid move for this valid position
+      ((x, y), possibilitiesFor((x, y), grid).head)
+    }
   }
-
 }
