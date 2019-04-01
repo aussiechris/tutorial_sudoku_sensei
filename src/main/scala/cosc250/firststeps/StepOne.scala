@@ -14,7 +14,7 @@ object StepOne {
     *
     * Start off by doing this iteratively. And then we'll discover how much shorter it is functionally.
     */
-  def doubleArray(arr:Array[Int]):Array[Int] = ???
+  def doubleArray(arr: Array[Int]): Array[Int] = for (a <- arr) yield a * 2
 
   /**
     * Multiply every element in an array by its position in the array
@@ -22,14 +22,14 @@ object StepOne {
     *
     * You might need zipWithIndex here...
     */
-  def timesPosition(arr:Array[Int]):Array[Int] = ???
+  def timesPosition(arr: Array[Int]): Array[Int] = for ((num, i) <- arr.zipWithIndex) yield num * i
 
 
   /**
     * Ok, we did that for arrays. Now, what if we want to do it for lists?
     * Hint: if you're working imperatively and mutably, you can start with an Array and then go .toList on it at the end
     */
-  def doubleList(arr:List[Int]):List[Int] = ???
+  def doubleList(arr: List[Int]): List[Int] = for (num <- arr) yield num * 2
 
 
   /**
@@ -37,13 +37,19 @@ object StepOne {
     * words have letters in commong. eg, for "frogs" and "eggs", we would return
     * List((3,1), (3,2), (4,3)
     */
-  def matchingLetters(wordA:String, wordB:String):List[(Int, Int)] = ???
+  def matchingLetters(wordA: String, wordB: String): List[(Int, Int)] = {
+    (for ((lA, iA) <- wordA.zipWithIndex; (lB, iB) <- wordB.zipWithIndex if lA == lB) yield (iA, iB)).toList
+  }
 
   /**
     * Ok, the Roman Numerals one is harder to do this way, but I'll leave it here for anyone who's keen. You can skip
     * it and head on to the Sudoku exercise if you'd prefer.
     */
-  def roman(i:Int):String = ???
+  def roman(i: Int): String = {
+    val numerals:List[(String,Int)]="I"->1::"IV"->4::"V"->5::"IX"->9::"X"->10::"L"->50::"XC"->90::"C"->100::"D"->500::"CM"->900::"M"->1000::Nil
+    // TODO - Come back to this
+   ???
+  }
 
 
   /*
