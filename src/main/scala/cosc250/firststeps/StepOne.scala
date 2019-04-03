@@ -1,7 +1,5 @@
 package cosc250.firststeps
 
-import scala.annotation.tailrec
-
 /**
   * Now we know about higher order functions, let's go back to the first tutorial and see if they can help us solve
   * the exercises. You are welcome to use the "for" notation, which is syntactic sugar for map and flatMap, and so
@@ -46,9 +44,14 @@ object StepOne {
     * it and head on to the Sudoku exercise if you'd prefer.
     */
   def roman(i: Int): String = {
-    val numerals:List[(String,Int)]="I"->1::"IV"->4::"V"->5::"IX"->9::"X"->10::"L"->50::"XC"->90::"C"->100::"D"->500::"CM"->900::"M"->1000::Nil
-    // TODO - Come back to this
-   ???
+    // get list of roman numeral characters and their values
+    val numerals: Seq[(String, Int)] = Seq(("M", 1000), ("CM", 900), ("D", 500), ("C", 100), ("XC", 90), ("L", 50), ("X", 10), ("IX", 9), ("V", 5), ("IV", 4), ("I", 1))
+    numerals.foldLeft((i, ""))({
+      // for each roman numeral character...
+      case ((remainder, outString), (rChar, rInt)) =>
+        // generate appropriate chars, append them to the output string, update the remainder and fold left
+        (remainder % rInt, outString + rChar * (remainder / rInt))
+    })._2 // output the generated string
   }
 
 
